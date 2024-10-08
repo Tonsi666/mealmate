@@ -1,14 +1,23 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../api/userQueries";
 import "./Login.css";
 
 function Login() {
-  const [username, setUsername] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
-    // Hier kannst du die Login-Logik hinzufügen
-    console.log("Benutzername:", username);
+    try {
+      await loginUser({ identifier, password });
+      navigate("/");
+    } catch (error) {
+      console.error("Login failed:", error);
+      alert("Login failed. Please check your credentials and try again.");
+    }
+    console.log("Identifier:", identifier);
     console.log("Passwort:", password);
   };
 
@@ -16,12 +25,12 @@ function Login() {
     <div className="login-container">
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
-        <label htmlFor="username">Benutzername</label>
+        <label htmlFor="identifier">Benutzername oder E-Mail</label>
         <input
           type="text"
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          id="identifier"
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
           required
         />
 
