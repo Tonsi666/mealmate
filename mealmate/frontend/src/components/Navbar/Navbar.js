@@ -1,10 +1,28 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FaHamburger } from "react-icons/fa";
 import "./Navbar.css";
+import { fetchUserData } from "../../api/userQueries";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchUserData(token)
+        .then((userData) => setUser(userData))
+        .catch((error) => console.error("Error fetching user data:", error));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("login");
+  };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -41,12 +59,23 @@ const Navbar = () => {
         </ul>
       </div>
       <div className="nav-buttons">
-        <Link to="/Login" className="link">
-          <button className="nav-button">Login</button>
-        </Link>
-        <Link to="/SignUp" className="link">
-          <button className="nav-button">Sign up</button>
-        </Link>
+        {user ? (
+          <>
+            <span>Welcome, {user.username}</span>
+            <button className="nav-button" onClick={handleLogout}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/Login" className="link">
+              <button className="nav-button">Login</button>
+            </Link>
+            <Link to="/SignUp" className="link">
+              <button className="nav-button">Sign up</button>
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );

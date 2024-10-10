@@ -11,7 +11,9 @@ function Login() {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      await loginUser({ identifier, password });
+      const token = await loginUser({ identifier, password });
+      console.log("Token in Local Storage:", token);
+      localStorage.setItem("token", token);
       navigate("/");
     } catch (error) {
       console.error("Login failed:", error);

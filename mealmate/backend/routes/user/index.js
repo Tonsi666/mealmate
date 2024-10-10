@@ -4,6 +4,7 @@ const userModel = require("../../database/models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Sequelize } = require("sequelize");
+const authenticateToken = require("../../middleware/auth");
 
 // Route zum Abrufen aller Nutzer
 router.get("/user", async (req, res) => {
@@ -40,7 +41,7 @@ router.post("/user", async (req, res) => {
 // Route zum Einloggen eines Nutzers
 router.post("/Login", async (req, res) => {
   try {
-    const { identifier, email } = req.body;
+    const { identifier, password } = req.body;
     const user = await userModel.findOne({
       where: {
         [Sequelize.Op.or]: [{ username: identifier }, { email: identifier }],
@@ -61,10 +62,25 @@ router.post("/Login", async (req, res) => {
       expiresIn: "1h",
     });
 
+    console.log("Generated Token:", token);
+
     res.json({ token });
   } catch (err) {
     console.error("Fehler beim Einloggen des Nutzers:", err);
     res.status(500).send("Fehler beim Einloggen des Nutzers.");
+  }
+});
+
+// Route zum Abrufen der Benutzerdaten basierend auf dem Token
+router.get("/me", authenticateToken, async (req, res) => {
+  try {
+    const user = await userModel.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).send("Benutzer nicht gefunden.");
+    }
+    res.json(user);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Benutzerdaten.");
   }
 });
 

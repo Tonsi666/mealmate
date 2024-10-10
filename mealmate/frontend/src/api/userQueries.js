@@ -1,9 +1,13 @@
 import api from "./api.js";
 
-async function fetchUserData(userId) {
+async function fetchUserData(token) {
   try {
-    const result = await api.get(`/user/${userId}`);
-    const userData = result.data;
+    const response = await api.get("/api/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const userData = response.data;
     console.log("User data:", userData);
     return userData;
   } catch (error) {
@@ -38,7 +42,7 @@ async function signupUser(userData) {
 async function loginUser(userData) {
   try {
     const response = await api.post("/api/login", userData);
-    const token = response.data;
+    const token = response.data.token;
     console.log("User logged in, token received:", token);
     localStorage.setItem("token", token);
     return token;
